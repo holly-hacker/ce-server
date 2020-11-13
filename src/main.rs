@@ -8,8 +8,7 @@ fn main() {
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {
-        let server = server::CheatEngineServer::new();
-        server.run().await.unwrap();
+        server::run::<server::TestHandler>().await.unwrap();
     })
 }
 

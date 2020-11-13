@@ -1,17 +1,15 @@
 use std::fmt::Debug;
 
 use bytes::Buf;
-use log::warn;
 
 use super::{command::*, commands_response::*};
 use super::command::Command;
 
-pub trait CERequest : Debug {
-    type Response: CEResponse + Debug;
+pub trait CERequest : Debug + Send {
+    type Response: CEResponse + Debug + Send;
 
     const ID: Command;
     fn read(buf: &mut dyn Buf) -> Self;
-    fn process(self) -> Self::Response;
 }
 
 #[derive(Debug)]
@@ -31,13 +29,6 @@ impl CERequest for CreateToolHelp32SnapshotRequest {
             process_id: buf.get_u32_le(),
         }
     }
-
-    fn process(self) -> CreateToolHelp32SnapshotResponse {
-        warn!("Stubbed CreateToolHelp32SnapshotResponse::process"); // TODO
-        CreateToolHelp32SnapshotResponse {
-            handle: 0
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -53,13 +44,6 @@ impl CERequest for Process32FirstRequest {
     fn read(buf: &mut dyn Buf) -> Self {
         Self {
             handle: buf.get_u32_le(),
-        }
-    }
-
-    fn process(self) -> Process32FirstResponse {
-        warn!("Stubbed Process32FirstResponse::process"); // TODO
-        Process32FirstResponse {
-            result: false,
         }
     }
 }
