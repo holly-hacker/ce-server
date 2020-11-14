@@ -67,3 +67,24 @@ impl CEResponse for I32Response {
         writer.put_i32_le(self.response);
     }
 }
+
+#[derive(Debug)]
+pub struct ArchitectureResponse {
+    pub response: Architecture,
+}
+
+impl CEResponse for ArchitectureResponse {
+    fn serialize(self, writer: &mut dyn BufMut) {
+        writer.put_u8(self.response as u8);
+    }
+}
+
+#[derive(Debug)]
+pub struct GetSymbolListFromFileResponse; // TODO implement
+
+impl CEResponse for GetSymbolListFromFileResponse {
+    fn serialize(self, writer: &mut dyn BufMut) {
+        // writing 0 for now
+        writer.put_i32(0);
+    }
+}

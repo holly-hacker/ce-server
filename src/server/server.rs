@@ -91,6 +91,9 @@ impl CheatEngineConnection {
             Module32FirstRequest,
             Module32NextRequest,
             CloseHandleRequest,
+            GetArchitectureRequest,
+            OpenProcessRequest,
+            GetSymbolListFromFileRequest,
         )
     }
 }

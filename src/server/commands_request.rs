@@ -114,3 +114,50 @@ impl CERequest for Module32NextRequest {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct GetArchitectureRequest;
+
+impl CERequest for GetArchitectureRequest {
+    type Response = ArchitectureResponse;
+
+    const ID: Command = CMD_GETARCHITECTURE;
+
+    fn read(_buf: &mut dyn Buf) -> Self {
+        Self
+    }
+}
+
+#[derive(Debug)]
+pub struct OpenProcessRequest {
+    pub pid: i32,
+}
+
+impl CERequest for OpenProcessRequest {
+    type Response = HandleResponse;
+
+    const ID: Command = CMD_OPENPROCESS;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        OpenProcessRequest {
+            pid: buf.get_i32_le(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct GetSymbolListFromFileRequest {
+    pub symbol_path: String,
+}
+
+impl CERequest for GetSymbolListFromFileRequest {
+    type Response = GetSymbolListFromFileResponse;
+
+    const ID: Command = CMD_GETSYMBOLLISTFROMFILE;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            symbol_path: read_u32_prefixed_string(buf),
+        }
+    }
+}

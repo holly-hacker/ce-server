@@ -13,6 +13,15 @@ pub struct CeModuleEntry {
     pub module_name: String,
 }
 
+#[derive(Debug)]
+#[allow(dead_code)] // only the one matching this arch will be used
+pub enum Architecture {
+    I386 = 1,
+    X86_64 = 2,
+    Arm = 3,
+    AArch64 = 4,
+}
+
 // NOTE: all handles seem to be 32-bit
 pub fn read_usize(buf: &mut dyn Buf) -> usize {
     match std::mem::size_of::<usize>() {
@@ -26,6 +35,13 @@ pub fn write_usize(buf: &mut dyn BufMut, value: usize) {
         4 | 8 => buf.put_u32_le(value as u32),
         _ => unreachable!(),
     }
+}
+
+pub fn read_u32_prefixed_string(buf: &mut dyn Buf) -> String {
+    let len = buf.get_u32_le();
+    let mut v = vec![];
+    v.put(buf.take(len as usize));
+    unsafe { String::from_utf8_unchecked(v) }
 }
 
 pub fn write_i32_prefixed_string(buf: &mut dyn BufMut, value: String) {
@@ -51,4 +67,32 @@ fn test_cstring_to_string() {
     assert_eq!(String::from("abc"), cstring_to_string(b"abc"));
     assert_eq!(String::from("abc"), cstring_to_string(b"abc\0"));
     assert_eq!(String::from("abc"), cstring_to_string(b"abc\0\0abc"));
+}
+
+pub fn get_process_architecture() -> Architecture {
+    #[cfg(target_arch = "x86")]
+    {
+        Architecture::I386
+    }
+    #[cfg(target_arch = "x86_64")]
+    {
+        Architecture::X86_64
+    }
+    #[cfg(target_arch = "arm")]
+    {
+        Architecture::Arm
+    }
+    #[cfg(target_arch = "aarch64")]
+    {
+        Architecture::AArch64
+    }
+    #[cfg(not(any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "arm",
+        target_arch = "aarch64",
+    )))]
+    {
+        std::compile_error!("Current architecture is not supported by Cheat Engine")
+    }
 }

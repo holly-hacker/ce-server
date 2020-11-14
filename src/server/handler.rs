@@ -9,6 +9,9 @@ pub trait FullHandler:
     + Handler<Module32FirstRequest>
     + Handler<Module32NextRequest>
     + Handler<CloseHandleRequest>
+    + Handler<GetArchitectureRequest>
+    + Handler<OpenProcessRequest>
+    + Handler<GetSymbolListFromFileRequest>
 {
     fn create() -> Self;
 }

@@ -1,11 +1,16 @@
 use crate::server::{ce_common::*, commands_request::*, commands_response::*, handler::*};
-use winapi::um::{
-    handleapi::CloseHandle,
-    tlhelp32::{
-        CreateToolhelp32Snapshot, Module32First, Module32Next, Process32First, Process32Next,
-        LPMODULEENTRY32, LPPROCESSENTRY32,
+use log::warn;
+use winapi::{
+    shared::minwindef::FALSE,
+    um::{
+        handleapi::CloseHandle,
+        processthreadsapi::OpenProcess,
+        tlhelp32::{
+            CreateToolhelp32Snapshot, Module32First, Module32Next, Process32First, Process32Next,
+            LPMODULEENTRY32, LPPROCESSENTRY32,
+        },
+        winnt::{HANDLE, PROCESS_ALL_ACCESS},
     },
-    winnt::HANDLE,
 };
 
 pub struct WindowsHandler;
@@ -98,5 +103,33 @@ impl Handler<CloseHandleRequest> for WindowsHandler {
 
             I32Response { response }
         }
+    }
+}
+
+impl Handler<GetArchitectureRequest> for WindowsHandler {
+    fn handle(&self, _eq: GetArchitectureRequest) -> ArchitectureResponse {
+        ArchitectureResponse {
+            response: get_process_architecture(),
+        }
+    }
+}
+
+impl Handler<OpenProcessRequest> for WindowsHandler {
+    fn handle(&self, req: OpenProcessRequest) -> HandleResponse {
+        unsafe {
+            let resp = OpenProcess(PROCESS_ALL_ACCESS, FALSE, req.pid as u32);
+            HandleResponse {
+                handle: resp as usize,
+            }
+        }
+    }
+}
+
+impl Handler<GetSymbolListFromFileRequest> for WindowsHandler {
+    fn handle(&self, req: GetSymbolListFromFileRequest) -> GetSymbolListFromFileResponse {
+        // TODO: see CheatEngine Server GetSymbolListFromFile
+        // https://github.com/cheat-engine/cheat-engine/blob/master/Cheat%20Engine/ceserver/symbols.c
+        warn!("STUBBED GetSymbolListFromFileRequest({})", req.symbol_path);
+        GetSymbolListFromFileResponse
     }
 }
