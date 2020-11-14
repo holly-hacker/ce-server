@@ -1,15 +1,15 @@
 use super::commands_request::*;
 
-pub trait HandlerFactory<T: FullHandler> {
-}
+pub trait HandlerFactory<T: FullHandler> {}
 
-pub trait FullHandler
-    : Handler<CreateToolHelp32SnapshotRequest>
+pub trait FullHandler:
+    Handler<CreateToolHelp32SnapshotRequest>
     + Handler<Process32FirstRequest>
     + Handler<Process32NextRequest>
     + Handler<Module32FirstRequest>
     + Handler<Module32NextRequest>
-    + Handler<CloseHandleRequest> {
+    + Handler<CloseHandleRequest>
+{
     fn create() -> Self;
 }
 

@@ -1,9 +1,9 @@
 use bytes::Buf;
-use log::{info, debug, error};
+use log::{debug, error, info};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
 
-use super::{handler::*, commands_request::*, commands_response::*};
+use super::{commands_request::*, commands_response::*, handler::*};
 
 const DEFAULT_PORT: u16 = 52736;
 
@@ -42,7 +42,7 @@ macro_rules! gen_request_dispatch {
             let mut buffer = Vec::new();
 
             let request = <$request>::read(&mut $bytes);
-            
+
             debug!("Received item {:?}", request);
             let response = $handler.handle(request);
             debug!("... responding with {:?}", response);

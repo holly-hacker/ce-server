@@ -28,8 +28,7 @@ impl CEResponse for Process32Response {
             writer.put_u32_le(1u32);
             writer.put_i32_le(entry.pid);
             write_i32_prefixed_string(writer, entry.process_name)
-        }
-        else {
+        } else {
             writer.put_u32_le(0u32);
             writer.put_i32_le(0); // pid
             writer.put_i32_le(0); // process name length
@@ -49,8 +48,7 @@ impl CEResponse for Module32Response {
             writer.put_i64_le(entry.module_base);
             writer.put_i32_le(entry.module_size);
             write_i32_prefixed_string(writer, entry.module_name)
-        }
-        else {
+        } else {
             writer.put_u32_le(0u32);
             writer.put_i64_le(0); // base
             writer.put_i32_le(0); // size

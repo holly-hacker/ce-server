@@ -36,7 +36,10 @@ pub fn write_i32_prefixed_string(buf: &mut dyn BufMut, value: String) {
 }
 
 pub fn cstring_to_string(with_zeroes: &[u8]) -> String {
-    let len = with_zeroes.iter().position(|i| *i == 0).unwrap_or(with_zeroes.len());
+    let len = with_zeroes
+        .iter()
+        .position(|i| *i == 0)
+        .unwrap_or(with_zeroes.len());
     let without_zeroes = &with_zeroes[0..len];
     String::from_utf8(without_zeroes.to_vec()).unwrap()
 }

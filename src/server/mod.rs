@@ -1,10 +1,10 @@
-mod server;
+mod ce_common;
 mod command;
 mod commands_request;
 mod commands_response;
 mod handler;
 mod handlers;
-mod ce_common;
+mod server;
 
-pub use server::run;
 pub use handlers::WindowsHandler;
+pub use server::run;

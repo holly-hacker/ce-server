@@ -2,9 +2,9 @@ use std::fmt::Debug;
 
 use bytes::Buf;
 
-use super::{command::*, commands_response::*, ce_common::*};
+use super::{ce_common::*, command::*, commands_response::*};
 
-pub trait CERequest : Debug + Send {
+pub trait CERequest: Debug + Send {
     type Response: CEResponse + Debug + Send;
 
     const ID: Command;
