@@ -1,9 +1,11 @@
 use crate::server::{ce_common::*, commands_request::*, commands_response::*, handler::*};
 use log::warn;
 use winapi::{
-    shared::minwindef::FALSE,
+    shared::minwindef::{FALSE, LPCVOID, LPVOID},
     um::{
         handleapi::CloseHandle,
+        memoryapi::ReadProcessMemory,
+        memoryapi::WriteProcessMemory,
         processthreadsapi::OpenProcess,
         tlhelp32::{
             CreateToolhelp32Snapshot, Module32First, Module32Next, Process32First, Process32Next,
@@ -50,7 +52,7 @@ where
     F: FnOnce(HANDLE, LPPROCESSENTRY32) -> i32,
 {
     let mut entry = std::mem::MaybeUninit::uninit().assume_init();
-    let response = func(std::mem::transmute(handle), &mut entry);
+    let response = func(handle as HANDLE, &mut entry);
 
     if response != 0 {
         Process32Response {
@@ -81,7 +83,7 @@ where
     F: FnOnce(HANDLE, LPMODULEENTRY32) -> i32,
 {
     let mut entry = std::mem::MaybeUninit::uninit().assume_init();
-    let response = func(std::mem::transmute(handle), &mut entry);
+    let response = func(handle as HANDLE, &mut entry);
 
     if response != 0 {
         Module32Response {
@@ -99,7 +101,7 @@ where
 impl Handler<CloseHandleRequest> for WindowsHandler {
     fn handle(&self, req: CloseHandleRequest) -> I32Response {
         unsafe {
-            let response = CloseHandle(std::mem::transmute(req.handle));
+            let response = CloseHandle(req.handle as HANDLE);
 
             I32Response { response }
         }
@@ -131,5 +133,56 @@ impl Handler<GetSymbolListFromFileRequest> for WindowsHandler {
         // https://github.com/cheat-engine/cheat-engine/blob/master/Cheat%20Engine/ceserver/symbols.c
         warn!("STUBBED GetSymbolListFromFileRequest({})", req.symbol_path);
         GetSymbolListFromFileResponse
+    }
+}
+
+impl Handler<ReadProcessMemoryRequest> for WindowsHandler {
+    fn handle(&self, req: ReadProcessMemoryRequest) -> ReadProcessMemoryResponse {
+        let mut buffer = vec![0u8; req.size as usize];
+        let mut bytes_read = 0;
+        let _resp = unsafe {
+            ReadProcessMemory(
+                req.handle as HANDLE,
+                req.address as LPVOID,
+                buffer.as_mut_ptr() as LPVOID,
+                req.size as usize,
+                &mut bytes_read,
+            )
+        };
+        if req.compress {
+            todo!()
+        } else {
+            ReadProcessMemoryResponse { data: buffer }
+        }
+    }
+}
+
+impl Handler<WriteProcessMemoryRequest> for WindowsHandler {
+    fn handle(&self, req: WriteProcessMemoryRequest) -> WriteProcessMemoryResponse {
+        unsafe {
+            let mut written = 0usize;
+            let mut data = req.data;
+            let success = WriteProcessMemory(
+                req.handle as HANDLE,
+                req.address as LPVOID,
+                data.as_mut_ptr() as LPCVOID,
+                data.len(),
+                &mut written,
+            );
+
+            if success == 0 {
+                warn!("Writing memory failed");
+            } else if written != data.len() {
+                warn!(
+                    "Expected to write {} bytes but wrote {}",
+                    data.len(),
+                    written
+                );
+            }
+
+            WriteProcessMemoryResponse {
+                written: written as u32,
+            }
+        }
     }
 }

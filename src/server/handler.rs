@@ -12,6 +12,8 @@ pub trait FullHandler:
     + Handler<GetArchitectureRequest>
     + Handler<OpenProcessRequest>
     + Handler<GetSymbolListFromFileRequest>
+    + Handler<ReadProcessMemoryRequest>
+    + Handler<WriteProcessMemoryRequest>
 {
     fn create() -> Self;
 }

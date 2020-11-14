@@ -94,6 +94,8 @@ impl CheatEngineConnection {
             GetArchitectureRequest,
             OpenProcessRequest,
             GetSymbolListFromFileRequest,
+            ReadProcessMemoryRequest,
+            WriteProcessMemoryRequest,
         )
     }
 }

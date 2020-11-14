@@ -85,6 +85,28 @@ pub struct GetSymbolListFromFileResponse; // TODO implement
 impl CEResponse for GetSymbolListFromFileResponse {
     fn serialize(self, writer: &mut dyn BufMut) {
         // writing 0 for now
-        writer.put_i32(0);
+        writer.put_i32_le(0);
+    }
+}
+
+#[derive(Debug)]
+pub struct ReadProcessMemoryResponse {
+    pub data: Vec<u8>,
+}
+
+impl CEResponse for ReadProcessMemoryResponse {
+    fn serialize(self, writer: &mut dyn BufMut) {
+        writer.put_slice(&self.data[..]);
+    }
+}
+
+#[derive(Debug)]
+pub struct WriteProcessMemoryResponse {
+    pub written: u32,
+}
+
+impl CEResponse for WriteProcessMemoryResponse {
+    fn serialize(self, writer: &mut dyn BufMut) {
+        writer.put_u32_le(self.written);
     }
 }

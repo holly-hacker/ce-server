@@ -161,3 +161,50 @@ impl CERequest for GetSymbolListFromFileRequest {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct ReadProcessMemoryRequest {
+    pub handle: u32,
+    pub address: u64,
+    pub size: u32,
+    pub compress: bool,
+}
+
+impl CERequest for ReadProcessMemoryRequest {
+    type Response = ReadProcessMemoryResponse;
+
+    const ID: Command = CMD_READPROCESSMEMORY;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: buf.get_u32_le(),
+            address: buf.get_u64_le(),
+            size: buf.get_u32_le(),
+            compress: buf.get_u8() != 0,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct WriteProcessMemoryRequest {
+    pub handle: u32,
+    pub address: u64,
+    pub data: Vec<u8>,
+}
+
+impl CERequest for WriteProcessMemoryRequest {
+    type Response = WriteProcessMemoryResponse;
+
+    const ID: Command = CMD_WRITEPROCESSMEMORY;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: buf.get_u32_le(),
+            address: buf.get_u64_le(),
+            data: {
+                let len = buf.get_u32_le();
+                Vec::from(buf.take(len as usize).bytes())
+            },
+        }
+    }
+}
