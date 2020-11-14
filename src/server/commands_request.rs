@@ -46,3 +46,71 @@ impl CERequest for Process32FirstRequest {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct Process32NextRequest {
+    pub handle: usize,
+}
+
+impl CERequest for Process32NextRequest {
+    type Response = Process32Response;
+
+    const ID: Command = CMD_PROCESS32NEXT;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: read_usize(buf),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct CloseHandleRequest {
+    pub handle: usize,
+}
+
+impl CERequest for CloseHandleRequest {
+    type Response = I32Response;
+
+    const ID: Command = CMD_CLOSEHANDLE;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: read_usize(buf),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Module32FirstRequest {
+    pub handle: usize,
+}
+
+impl CERequest for Module32FirstRequest {
+    type Response = Module32Response;
+
+    const ID: Command = CMD_MODULE32FIRST;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: read_usize(buf),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Module32NextRequest {
+    pub handle: usize,
+}
+
+impl CERequest for Module32NextRequest {
+    type Response = Module32Response;
+
+    const ID: Command = CMD_MODULE32NEXT;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: read_usize(buf),
+        }
+    }
+}

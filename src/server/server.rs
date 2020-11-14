@@ -26,12 +26,15 @@ pub struct CheatEngineConnection(TcpStream);
 
 // generics werent powerful enough
 macro_rules! gen_request_dispatch {
-    ($bytes: ident for $handler: ident, $($request: ty),*) => {
+    ($bytes: ident for $handler: ident, $($request: ty,)*) => {
         match $bytes.get_u8() {
             $(
                 <$request>::ID => gen_request_dispatch!($request, $bytes, $handler),
             )*
-            byte => todo!("Unimplemented packet byte {}", byte),
+            byte => {
+                error!("Unimplemented packet byte {} (data: {:?})", byte, $bytes);
+                todo!("Unimplemented packet byte {}", byte);
+            },
         }
     };
     ($request: ty, $bytes: ident, $handler: ident) => {
@@ -83,7 +86,11 @@ impl CheatEngineConnection {
         gen_request_dispatch!(
             bytes for handler,
             CreateToolHelp32SnapshotRequest,
-            Process32FirstRequest
+            Process32FirstRequest,
+            Process32NextRequest,
+            Module32FirstRequest,
+            Module32NextRequest,
+            CloseHandleRequest,
         )
     }
 }
