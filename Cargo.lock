@@ -40,6 +40,7 @@ dependencies = [
  "log",
  "pretty_env_logger",
  "tokio",
+ "winapi",
 ]
 
 [[package]]

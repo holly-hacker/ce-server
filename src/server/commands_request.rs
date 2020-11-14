@@ -2,8 +2,7 @@ use std::fmt::Debug;
 
 use bytes::Buf;
 
-use super::{command::*, commands_response::*};
-use super::command::Command;
+use super::{command::*, commands_response::*, ce_common::*};
 
 pub trait CERequest : Debug + Send {
     type Response: CEResponse + Debug + Send;
@@ -19,7 +18,7 @@ pub struct CreateToolHelp32SnapshotRequest {
 }
 
 impl CERequest for CreateToolHelp32SnapshotRequest {
-    type Response = CreateToolHelp32SnapshotResponse;
+    type Response = HandleResponse;
 
     const ID: Command = CMD_CREATETOOLHELP32SNAPSHOT;
 
@@ -33,17 +32,17 @@ impl CERequest for CreateToolHelp32SnapshotRequest {
 
 #[derive(Debug)]
 pub struct Process32FirstRequest {
-    pub handle: u32,
+    pub handle: usize,
 }
 
 impl CERequest for Process32FirstRequest {
-    type Response = Process32FirstResponse;
+    type Response = Process32Response;
 
     const ID: Command = CMD_PROCESS32FIRST;
 
     fn read(buf: &mut dyn Buf) -> Self {
         Self {
-            handle: buf.get_u32_le(),
+            handle: read_usize(buf),
         }
     }
 }
