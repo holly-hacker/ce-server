@@ -1,11 +1,25 @@
 mod server;
 
 use log::info;
+use simplelog::*;
 
 fn main() {
-    pretty_env_logger::formatted_builder()
-        .filter_level(log::LevelFilter::Debug)
-        .init();
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            log::LevelFilter::Info,
+            Config::default(),
+            TerminalMode::Mixed,
+        )
+        .expect("Could not create terminal logger"),
+        WriteLogger::new(
+            log::LevelFilter::Debug,
+            Config::default(),
+            std::fs::File::create("ce-server.log")
+                .expect("Could not create file 'ce-server.log' for logging"),
+        ),
+    ])
+    .expect("Could not create logger");
+
     info!("Hello, world!");
 
     let rt = tokio::runtime::Runtime::new().unwrap();
