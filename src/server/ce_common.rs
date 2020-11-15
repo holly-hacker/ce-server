@@ -25,10 +25,10 @@ pub struct RegionInfo {
 #[derive(Debug)]
 #[allow(dead_code)] // only the one matching this arch will be used
 pub enum Architecture {
-    I386 = 1,
-    X86_64 = 2,
-    Arm = 3,
-    AArch64 = 4,
+    I386 = 0,
+    X86_64 = 1,
+    Arm = 2,
+    AArch64 = 3,
 }
 
 // NOTE: all handles seem to be 32-bit
