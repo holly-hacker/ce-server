@@ -157,10 +157,18 @@ impl Handler<ReadProcessMemoryRequest> for WindowsHandler {
                 &mut bytes_read,
             )
         };
-        if req.compress {
-            todo!()
+        if req.compression_level != 0 {
+            buffer = compress_data(buffer, req.compression_level);
+            ReadProcessMemoryResponse {
+                data: ReadMemoryData::Compressed {
+                    uncompressed_size: bytes_read as u32,
+                    compressed_data: buffer,
+                },
+            }
         } else {
-            ReadProcessMemoryResponse { data: buffer }
+            ReadProcessMemoryResponse {
+                data: ReadMemoryData::Uncompressed { data: buffer },
+            }
         }
     }
 }

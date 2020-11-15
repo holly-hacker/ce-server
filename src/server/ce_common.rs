@@ -105,3 +105,24 @@ pub fn get_process_architecture() -> Architecture {
         std::compile_error!("Current architecture is not supported by Cheat Engine")
     }
 }
+
+#[derive(Debug)]
+pub enum ReadMemoryData {
+    Uncompressed {
+        data: Vec<u8>,
+    },
+    Compressed {
+        uncompressed_size: u32,
+        compressed_data: Vec<u8>,
+    },
+}
+
+pub fn compress_data(data: Vec<u8>, level: u8) -> Vec<u8> {
+    // const BLOCK_SIZE: usize = 64 * 1024;
+    // let max_blocks = 1 + (data.len() / BLOCK_SIZE);
+    // let blocks = vec![[0u8; BLOCK_SIZE]; max_blocks];
+
+    // deflate to first block
+    let compressed = miniz_oxide::deflate::compress_to_vec_zlib(&data[..], level);
+    compressed
+}

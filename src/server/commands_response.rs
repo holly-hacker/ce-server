@@ -91,13 +91,25 @@ impl CEResponse for GetSymbolListFromFileResponse {
 
 #[derive(Debug)]
 pub struct ReadProcessMemoryResponse {
-    pub data: Vec<u8>,
+    pub data: ReadMemoryData,
 }
 
 impl CEResponse for ReadProcessMemoryResponse {
     fn serialize(self, writer: &mut dyn BufMut) {
-        writer.put_i32_le(self.data.len() as i32);
-        writer.put_slice(&self.data[..]);
+        match self.data {
+            ReadMemoryData::Uncompressed { data } => {
+                writer.put_i32_le(data.len() as i32);
+                writer.put_slice(&data[..]);
+            }
+            ReadMemoryData::Compressed {
+                uncompressed_size,
+                compressed_data,
+            } => {
+                writer.put_u32_le(uncompressed_size);
+                writer.put_u32_le(compressed_data.len() as u32);
+                writer.put_slice(&compressed_data[..]);
+            }
+        }
     }
 }
 

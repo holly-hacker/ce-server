@@ -167,7 +167,7 @@ pub struct ReadProcessMemoryRequest {
     pub handle: u32,
     pub address: u64,
     pub size: u32,
-    pub compress: bool,
+    pub compression_level: u8,
 }
 
 impl CERequest for ReadProcessMemoryRequest {
@@ -180,7 +180,7 @@ impl CERequest for ReadProcessMemoryRequest {
             handle: buf.get_u32_le(),
             address: buf.get_u64_le(),
             size: buf.get_u32_le(),
-            compress: buf.get_u8() != 0,
+            compression_level: buf.get_u8(),
         }
     }
 }
