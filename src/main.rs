@@ -11,6 +11,7 @@ fn main() {
             TerminalMode::Mixed,
         )
         .expect("Could not create terminal logger"),
+        #[cfg(feature = "trace")]
         WriteLogger::new(
             log::LevelFilter::Debug,
             Config::default(),
