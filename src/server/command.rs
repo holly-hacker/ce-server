@@ -35,5 +35,5 @@ pub const CMD_LOADMODULE: Command = 29;
 pub const CMD_SPEEDHACK_SETSPEED: Command = 30;
 pub const CMD_VIRTUALQUERYEXFULL: Command = 31;
 pub const CMD_GETREGIONINFO: Command = 32;
-pub const CMD_AOBSCAN: Command = 32;
+pub const CMD_AOBSCAN: Command = 33;
 pub const CMD_COMMANDLIST2: Command = 255;
