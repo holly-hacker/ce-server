@@ -96,6 +96,7 @@ pub struct ReadProcessMemoryResponse {
 
 impl CEResponse for ReadProcessMemoryResponse {
     fn serialize(self, writer: &mut dyn BufMut) {
+        writer.put_i32_le(self.data.len() as i32);
         writer.put_slice(&self.data[..]);
     }
 }

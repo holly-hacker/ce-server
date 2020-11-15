@@ -8,6 +8,7 @@ use winapi::{
         memoryapi::VirtualQueryEx,
         memoryapi::WriteProcessMemory,
         processthreadsapi::OpenProcess,
+        tlhelp32::MODULEENTRY32,
         tlhelp32::{
             CreateToolhelp32Snapshot, Module32First, Module32Next, Process32First, Process32Next,
             LPMODULEENTRY32, LPPROCESSENTRY32,
@@ -84,7 +85,8 @@ unsafe fn get_module_response<F>(handle: usize, func: F) -> Module32Response
 where
     F: FnOnce(HANDLE, LPMODULEENTRY32) -> i32,
 {
-    let mut entry = std::mem::MaybeUninit::uninit().assume_init();
+    let mut entry: MODULEENTRY32 = std::mem::MaybeUninit::uninit().assume_init();
+    entry.dwSize = std::mem::size_of::<MODULEENTRY32>() as u32;
     let response = func(handle as HANDLE, &mut entry);
 
     if response != 0 {
@@ -104,6 +106,10 @@ impl Handler<CloseHandleRequest> for WindowsHandler {
     fn handle(&self, req: CloseHandleRequest) -> I32Response {
         unsafe {
             let response = CloseHandle(req.handle as HANDLE);
+
+            if response != 1 {
+                warn!("CloseHandle returned {}", response);
+            }
 
             I32Response { response }
         }

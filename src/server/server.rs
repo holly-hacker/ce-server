@@ -71,10 +71,9 @@ impl CheatEngineConnection {
             };
 
             let request = &buf[..n];
-            debug!("incoming data({}): {:?}", request[0], request);
+            let response = Self::handle(request, &handler);
 
             // Write the data back
-            let response = Self::handle(request, &handler);
             if let Err(e) = socket.write_all(&response[..]).await {
                 error!("failed to write to socket; err = {:?}", e);
                 return;
