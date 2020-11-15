@@ -14,6 +14,15 @@ pub struct CeModuleEntry {
 }
 
 #[derive(Debug)]
+// TODO: use enums
+pub struct RegionInfo {
+    pub base_address: u64,
+    pub size: u64,
+    pub protection: u32,
+    pub memory_type: u32,
+}
+
+#[derive(Debug)]
 #[allow(dead_code)] // only the one matching this arch will be used
 pub enum Architecture {
     I386 = 1,

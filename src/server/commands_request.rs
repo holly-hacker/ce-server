@@ -208,3 +208,41 @@ impl CERequest for WriteProcessMemoryRequest {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct VirtualQueryExRequest {
+    pub handle: i32,
+    pub base_address: u64,
+}
+
+impl CERequest for VirtualQueryExRequest {
+    type Response = VirtualQueryExResponse;
+
+    const ID: Command = CMD_VIRTUALQUERYEX;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: buf.get_i32_le(),
+            base_address: buf.get_u64_le(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct VirtualQueryExFullRequest {
+    pub handle: i32,
+    pub flags: u8,
+}
+
+impl CERequest for VirtualQueryExFullRequest {
+    type Response = VirtualQueryExFullResponse;
+
+    const ID: Command = CMD_VIRTUALQUERYEXFULL;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            handle: buf.get_i32_le(),
+            flags: buf.get_u8(),
+        }
+    }
+}

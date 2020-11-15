@@ -110,3 +110,44 @@ impl CEResponse for WriteProcessMemoryResponse {
         writer.put_u32_le(self.written);
     }
 }
+
+#[derive(Debug)]
+pub struct VirtualQueryExResponse {
+    pub info: Option<RegionInfo>,
+}
+
+impl CEResponse for VirtualQueryExResponse {
+    fn serialize(self, writer: &mut dyn BufMut) {
+        if let Some(info) = self.info {
+            writer.put_u8(1);
+            writer.put_u32_le(info.protection);
+            writer.put_u32_le(info.memory_type);
+            writer.put_u64_le(info.base_address);
+            writer.put_u64_le(info.size);
+        } else {
+            writer.put_u8(0);
+            writer.put_u32_le(0);
+            writer.put_u32_le(0);
+            writer.put_u64_le(0);
+            writer.put_u64_le(0);
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct VirtualQueryExFullResponse {
+    pub info: Vec<RegionInfo>,
+}
+
+impl CEResponse for VirtualQueryExFullResponse {
+    fn serialize(self, writer: &mut dyn BufMut) {
+        writer.put_u32_le(self.info.len() as u32);
+        for region in self.info {
+            // Sends RegionInfo struct, not VirtualQueryExFullResponse
+            writer.put_u64_le(region.base_address);
+            writer.put_u64_le(region.size);
+            writer.put_u32_le(region.protection);
+            writer.put_u32_le(region.memory_type);
+        }
+    }
+}

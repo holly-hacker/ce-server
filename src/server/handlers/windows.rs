@@ -5,12 +5,14 @@ use winapi::{
     um::{
         handleapi::CloseHandle,
         memoryapi::ReadProcessMemory,
+        memoryapi::VirtualQueryEx,
         memoryapi::WriteProcessMemory,
         processthreadsapi::OpenProcess,
         tlhelp32::{
             CreateToolhelp32Snapshot, Module32First, Module32Next, Process32First, Process32Next,
             LPMODULEENTRY32, LPPROCESSENTRY32,
         },
+        winnt::MEMORY_BASIC_INFORMATION,
         winnt::{HANDLE, PROCESS_ALL_ACCESS},
     },
 };
@@ -184,5 +186,80 @@ impl Handler<WriteProcessMemoryRequest> for WindowsHandler {
                 written: written as u32,
             }
         }
+    }
+}
+
+impl Handler<VirtualQueryExRequest> for WindowsHandler {
+    fn handle(&self, req: VirtualQueryExRequest) -> VirtualQueryExResponse {
+        unsafe {
+            let mut data =
+                std::mem::MaybeUninit::<MEMORY_BASIC_INFORMATION>::uninit().assume_init();
+            let size = VirtualQueryEx(
+                req.handle as HANDLE,
+                req.base_address as LPCVOID,
+                &mut data,
+                std::mem::size_of::<MEMORY_BASIC_INFORMATION>(),
+            );
+
+            if size != 0 {
+                VirtualQueryExResponse {
+                    info: Some(RegionInfo {
+                        protection: data.Protect,
+                        memory_type: data.Type,
+                        base_address: data.BaseAddress as u64,
+                        size: data.RegionSize as u64,
+                    }),
+                }
+            } else {
+                VirtualQueryExResponse { info: None }
+            }
+        }
+    }
+}
+
+impl Handler<VirtualQueryExFullRequest> for WindowsHandler {
+    fn handle(&self, req: VirtualQueryExFullRequest) -> VirtualQueryExFullResponse {
+        let mut items = vec![];
+
+        let (_paged_only, _dirty_only, _no_shared) =
+            (req.flags | 1 != 0, req.flags | 2 != 0, req.flags | 4 != 0);
+        // TODO: use these flags?
+        // https://github.com/cheat-engine/cheat-engine/blob/master/Cheat%20Engine/ceserver/api.c#L2822
+
+        let mut address = 0usize;
+
+        loop {
+            let option = unsafe {
+                let mut data =
+                    std::mem::MaybeUninit::<MEMORY_BASIC_INFORMATION>::uninit().assume_init();
+                let size = VirtualQueryEx(
+                    req.handle as HANDLE,
+                    address as LPCVOID,
+                    &mut data,
+                    std::mem::size_of::<MEMORY_BASIC_INFORMATION>(),
+                );
+
+                if size != 0 {
+                    address += data.RegionSize;
+
+                    Some(RegionInfo {
+                        protection: data.Protect,
+                        memory_type: data.Type,
+                        base_address: data.BaseAddress as u64,
+                        size: data.RegionSize as u64,
+                    })
+                } else {
+                    None
+                }
+            };
+
+            if let Some(info) = option {
+                items.push(info);
+            } else {
+                break;
+            }
+        }
+
+        VirtualQueryExFullResponse { info: items }
     }
 }

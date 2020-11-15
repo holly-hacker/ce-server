@@ -96,6 +96,8 @@ impl CheatEngineConnection {
             GetSymbolListFromFileRequest,
             ReadProcessMemoryRequest,
             WriteProcessMemoryRequest,
+            VirtualQueryExRequest,
+            VirtualQueryExFullRequest,
         )
     }
 }

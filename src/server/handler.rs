@@ -14,6 +14,8 @@ pub trait FullHandler:
     + Handler<GetSymbolListFromFileRequest>
     + Handler<ReadProcessMemoryRequest>
     + Handler<WriteProcessMemoryRequest>
+    + Handler<VirtualQueryExRequest>
+    + Handler<VirtualQueryExFullRequest>
 {
     fn create() -> Self;
 }
