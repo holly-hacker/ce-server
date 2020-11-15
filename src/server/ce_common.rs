@@ -32,7 +32,7 @@ pub enum Architecture {
 }
 
 // NOTE: all handles seem to be 32-bit
-pub fn read_usize(buf: &mut dyn Buf) -> usize {
+pub fn read_handle(buf: &mut dyn Buf) -> usize {
     match std::mem::size_of::<usize>() {
         4 | 8 => buf.get_u32_le() as usize,
         _ => unreachable!(),

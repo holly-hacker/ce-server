@@ -42,7 +42,7 @@ impl CERequest for Process32FirstRequest {
 
     fn read(buf: &mut dyn Buf) -> Self {
         Self {
-            handle: read_usize(buf),
+            handle: read_handle(buf),
         }
     }
 }
@@ -59,7 +59,7 @@ impl CERequest for Process32NextRequest {
 
     fn read(buf: &mut dyn Buf) -> Self {
         Self {
-            handle: read_usize(buf),
+            handle: read_handle(buf),
         }
     }
 }
@@ -76,7 +76,7 @@ impl CERequest for CloseHandleRequest {
 
     fn read(buf: &mut dyn Buf) -> Self {
         Self {
-            handle: read_usize(buf),
+            handle: read_handle(buf),
         }
     }
 }
@@ -93,7 +93,7 @@ impl CERequest for Module32FirstRequest {
 
     fn read(buf: &mut dyn Buf) -> Self {
         Self {
-            handle: read_usize(buf),
+            handle: read_handle(buf),
         }
     }
 }
@@ -110,7 +110,7 @@ impl CERequest for Module32NextRequest {
 
     fn read(buf: &mut dyn Buf) -> Self {
         Self {
-            handle: read_usize(buf),
+            handle: read_handle(buf),
         }
     }
 }
