@@ -205,28 +205,8 @@ impl Handler<WriteProcessMemoryRequest> for WindowsHandler {
 
 impl Handler<VirtualQueryExRequest> for WindowsHandler {
     fn handle(&self, req: VirtualQueryExRequest) -> VirtualQueryExResponse {
-        unsafe {
-            let mut data =
-                std::mem::MaybeUninit::<MEMORY_BASIC_INFORMATION>::uninit().assume_init();
-            let size = VirtualQueryEx(
-                req.handle as HANDLE,
-                req.base_address as LPCVOID,
-                &mut data,
-                std::mem::size_of::<MEMORY_BASIC_INFORMATION>(),
-            );
-
-            if size != 0 {
-                VirtualQueryExResponse {
-                    info: Some(RegionInfo {
-                        protection: data.Protect,
-                        memory_type: data.Type,
-                        base_address: data.BaseAddress as u64,
-                        size: data.RegionSize as u64,
-                    }),
-                }
-            } else {
-                VirtualQueryExResponse { info: None }
-            }
+        VirtualQueryExResponse {
+            info: unsafe { virtual_query_ex(req.handle, req.base_address as usize) },
         }
     }
 }
@@ -243,31 +223,10 @@ impl Handler<VirtualQueryExFullRequest> for WindowsHandler {
         let mut address = 0usize;
 
         loop {
-            let option = unsafe {
-                let mut data =
-                    std::mem::MaybeUninit::<MEMORY_BASIC_INFORMATION>::uninit().assume_init();
-                let size = VirtualQueryEx(
-                    req.handle as HANDLE,
-                    address as LPCVOID,
-                    &mut data,
-                    std::mem::size_of::<MEMORY_BASIC_INFORMATION>(),
-                );
-
-                if size != 0 {
-                    address += data.RegionSize;
-
-                    Some(RegionInfo {
-                        protection: data.Protect,
-                        memory_type: data.Type,
-                        base_address: data.BaseAddress as u64,
-                        size: data.RegionSize as u64,
-                    })
-                } else {
-                    None
-                }
-            };
+            let option = unsafe { virtual_query_ex(req.handle, address) };
 
             if let Some(info) = option {
+                address += info.size as usize;
                 items.push(info);
             } else {
                 break;
@@ -275,5 +234,26 @@ impl Handler<VirtualQueryExFullRequest> for WindowsHandler {
         }
 
         VirtualQueryExFullResponse { info: items }
+    }
+}
+
+unsafe fn virtual_query_ex(handle: i32, address: usize) -> Option<RegionInfo> {
+    let mut data = std::mem::MaybeUninit::<MEMORY_BASIC_INFORMATION>::uninit().assume_init();
+    let size = VirtualQueryEx(
+        handle as HANDLE,
+        address as LPCVOID,
+        &mut data,
+        std::mem::size_of::<MEMORY_BASIC_INFORMATION>(),
+    );
+
+    if size != 0 {
+        Some(RegionInfo {
+            protection: data.Protect,
+            memory_type: data.Type,
+            base_address: data.BaseAddress as u64,
+            size: data.RegionSize as u64,
+        })
+    } else {
+        None
     }
 }
