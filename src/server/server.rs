@@ -10,7 +10,8 @@ use super::{commands_request::*, commands_response::*, handler::*};
 const DEFAULT_PORT: u16 = 52736;
 
 pub async fn run<T: FullHandler + Send>() -> Result<(), Box<dyn std::error::Error>> {
-    let listener = TcpListener::bind(("127.0.0.1", DEFAULT_PORT)).await?;
+    let listener = TcpListener::bind(("0.0.0.0", DEFAULT_PORT)).await?;
+    info!("Listening on 0.0.0.0:{DEFAULT_PORT}");
 
     loop {
         let (socket, addr) = listener.accept().await?;
