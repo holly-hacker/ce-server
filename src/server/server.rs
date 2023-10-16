@@ -1,7 +1,9 @@
 use bytes::Buf;
 use log::{debug, error, info};
-use tokio::net::{TcpListener, TcpStream};
-use tokio::prelude::*;
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::{TcpListener, TcpStream},
+};
 
 use super::{commands_request::*, commands_response::*, handler::*};
 
