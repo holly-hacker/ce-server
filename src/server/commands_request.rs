@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use bytes::Buf;
+use bytes::{Buf, BufMut};
 
 use super::{ce_common::*, command::*, commands_response::*};
 
@@ -203,7 +203,9 @@ impl CERequest for WriteProcessMemoryRequest {
             address: buf.get_u64_le(),
             data: {
                 let len = buf.get_u32_le();
-                Vec::from(buf.take(len as usize).bytes())
+                let mut vec = Vec::new();
+                vec.put(buf.take(len as usize));
+                vec
             },
         }
     }

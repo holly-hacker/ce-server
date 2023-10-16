@@ -9,8 +9,8 @@ fn main() {
             log::LevelFilter::Info,
             Config::default(),
             TerminalMode::Mixed,
-        )
-        .expect("Could not create terminal logger"),
+            ColorChoice::Auto,
+        ),
         #[cfg(feature = "trace")]
         WriteLogger::new(
             log::LevelFilter::Debug,
