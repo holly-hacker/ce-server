@@ -11,7 +11,7 @@ use winapi::{
         tlhelp32::MODULEENTRY32,
         tlhelp32::{
             CreateToolhelp32Snapshot, Module32First, Module32Next, Process32First, Process32Next,
-            LPMODULEENTRY32, LPPROCESSENTRY32,
+            LPMODULEENTRY32, LPPROCESSENTRY32, PROCESSENTRY32,
         },
         winnt::MEMORY_BASIC_INFORMATION,
         winnt::{HANDLE, PROCESS_ALL_ACCESS},
@@ -54,7 +54,7 @@ unsafe fn get_process_response<F>(handle: usize, func: F) -> Process32Response
 where
     F: FnOnce(HANDLE, LPPROCESSENTRY32) -> i32,
 {
-    let mut entry = std::mem::MaybeUninit::uninit().assume_init();
+    let mut entry = PROCESSENTRY32::default();
     let response = func(handle as HANDLE, &mut entry);
 
     if response != 0 {
@@ -85,8 +85,10 @@ unsafe fn get_module_response<F>(handle: usize, func: F) -> Module32Response
 where
     F: FnOnce(HANDLE, LPMODULEENTRY32) -> i32,
 {
-    let mut entry: MODULEENTRY32 = std::mem::MaybeUninit::uninit().assume_init();
-    entry.dwSize = std::mem::size_of::<MODULEENTRY32>() as u32;
+    let mut entry = MODULEENTRY32 {
+        dwSize: std::mem::size_of::<MODULEENTRY32>() as u32,
+        ..Default::default()
+    };
     let response = func(handle as HANDLE, &mut entry);
 
     if response != 0 {
@@ -216,7 +218,7 @@ impl Handler<VirtualQueryExFullRequest> for WindowsHandler {
         let mut items = vec![];
 
         let (_paged_only, _dirty_only, _no_shared) =
-            (req.flags | 1 != 0, req.flags | 2 != 0, req.flags | 4 != 0);
+            (req.flags & 1 != 0, req.flags & 2 != 0, req.flags & 4 != 0);
         // TODO: use these flags?
         // https://github.com/cheat-engine/cheat-engine/blob/master/Cheat%20Engine/ceserver/api.c#L2822
 
@@ -238,7 +240,7 @@ impl Handler<VirtualQueryExFullRequest> for WindowsHandler {
 }
 
 unsafe fn virtual_query_ex(handle: i32, address: usize) -> Option<RegionInfo> {
-    let mut data = std::mem::MaybeUninit::<MEMORY_BASIC_INFORMATION>::uninit().assume_init();
+    let mut data = MEMORY_BASIC_INFORMATION::default();
     let size = VirtualQueryEx(
         handle as HANDLE,
         address as LPCVOID,

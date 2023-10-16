@@ -123,6 +123,5 @@ pub fn compress_data(data: Vec<u8>, level: u8) -> Vec<u8> {
     // let blocks = vec![[0u8; BLOCK_SIZE]; max_blocks];
 
     // deflate to first block
-    let compressed = miniz_oxide::deflate::compress_to_vec_zlib(&data[..], level);
-    compressed
+    miniz_oxide::deflate::compress_to_vec_zlib(&data[..], level)
 }

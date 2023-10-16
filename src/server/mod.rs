@@ -4,6 +4,8 @@ mod commands_request;
 mod commands_response;
 mod handler;
 mod handlers;
+
+#[allow(clippy::module_inception)] // FIXME
 mod server;
 
 pub use handlers::WindowsHandler;
