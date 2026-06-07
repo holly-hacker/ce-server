@@ -12,6 +12,19 @@ pub trait CERequest: Debug + Send {
 }
 
 #[derive(Debug)]
+pub struct GetVersionRequest;
+
+impl CERequest for GetVersionRequest {
+    type Response = GetVersionResponse;
+
+    const ID: Command = CMD_GETVERSION;
+
+    fn read(_buf: &mut dyn Buf) -> Self {
+        Self
+    }
+}
+
+#[derive(Debug)]
 pub struct CreateToolHelp32SnapshotRequest {
     pub snapshot_flags: u32,
     pub process_id: u32,
@@ -226,6 +239,23 @@ impl CERequest for VirtualQueryExRequest {
         Self {
             handle: buf.get_i32_le(),
             base_address: buf.get_u64_le(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct SetConnectionNameRequest {
+    pub name: String,
+}
+
+impl CERequest for SetConnectionNameRequest {
+    type Response = EmptyResponse;
+
+    const ID: Command = CMD_SET_CONNECTION_NAME;
+
+    fn read(buf: &mut dyn Buf) -> Self {
+        Self {
+            name: read_u32_prefixed_string(buf),
         }
     }
 }

@@ -6,6 +6,36 @@ pub trait CEResponse {
     fn serialize(self, writer: &mut dyn BufMut);
 }
 
+/// The server protocol version.
+/// version 6 matches Cheat Engine v7.6, version 7 matches v7.7 (which is the first Linux-compatible release)
+pub const CESERVER_VERSION: i32 = 6;
+
+/// Appears to be unused. Theoretically starting with "lib" could trigger something, but right now it doesn't.
+pub const CESERVER_VERSION_STRING: &str = "v9.ce-server";
+
+#[derive(Debug)]
+pub struct GetVersionResponse {
+    pub version: i32,
+    pub name: String,
+}
+
+impl CEResponse for GetVersionResponse {
+    fn serialize(self, writer: &mut dyn BufMut) {
+        writer.put_i32_le(self.version);
+        writer.put_u8(self.name.len() as u8);
+        writer.put_slice(self.name.as_bytes());
+    }
+}
+
+/// A response that writes nothing back to the client, for commands the CE
+/// protocol does not reply to (e.g. `CMD_SET_CONNECTION_NAME`).
+#[derive(Debug)]
+pub struct EmptyResponse;
+
+impl CEResponse for EmptyResponse {
+    fn serialize(self, _writer: &mut dyn BufMut) {}
+}
+
 #[derive(Debug)]
 pub struct HandleResponse {
     pub handle: usize,
@@ -46,12 +76,16 @@ impl CEResponse for Module32Response {
         if let Some(entry) = self.entry {
             writer.put_u32_le(1u32);
             writer.put_i64_le(entry.module_base);
+            writer.put_i32_le(entry.module_part);
             writer.put_i32_le(entry.module_size);
+            writer.put_u32_le(entry.module_file_offset);
             write_i32_prefixed_string(writer, entry.module_name)
         } else {
             writer.put_u32_le(0u32);
             writer.put_i64_le(0); // base
+            writer.put_i32_le(0); // part
             writer.put_i32_le(0); // size
+            writer.put_u32_le(0); // file offset
             writer.put_i32_le(0); // module name length
         }
     }

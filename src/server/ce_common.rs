@@ -9,7 +9,9 @@ pub struct CeProcessEntry {
 #[derive(Debug)]
 pub struct CeModuleEntry {
     pub module_base: i64,
+    pub module_part: i32,
     pub module_size: i32,
+    pub module_file_offset: u32,
     pub module_name: String,
 }
 

@@ -87,6 +87,7 @@ impl CheatEngineConnection {
     fn handle(mut bytes: &[u8], handler: &impl FullHandler) -> Vec<u8> {
         gen_request_dispatch!(
             bytes for handler,
+            GetVersionRequest,
             CreateToolHelp32SnapshotRequest,
             Process32FirstRequest,
             Process32NextRequest,
@@ -100,6 +101,7 @@ impl CheatEngineConnection {
             WriteProcessMemoryRequest,
             VirtualQueryExRequest,
             VirtualQueryExFullRequest,
+            SetConnectionNameRequest,
         )
     }
 }

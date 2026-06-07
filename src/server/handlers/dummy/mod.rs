@@ -3,7 +3,7 @@ mod handle_allocator;
 
 use std::sync::{LazyLock, Mutex};
 
-use log::warn;
+use log::{info, warn};
 
 use crate::server::{
     ce_common::{
@@ -112,7 +112,9 @@ fn handle_module32(handle: usize, is_next: bool) -> Module32Response {
             .and_then(|process| process.modules.get(module_idx))
             .map(|module| CeModuleEntry {
                 module_base: module.base,
+                module_part: 0,
                 module_size: module.memory.len() as i32,
+                module_file_offset: 0,
                 module_name: module.name.to_string(),
             }),
     }
@@ -128,6 +130,15 @@ impl Handler<CloseHandleRequest> for DummyHandler {
 
         I32Response {
             response: closed as i32,
+        }
+    }
+}
+
+impl Handler<GetVersionRequest> for DummyHandler {
+    fn handle(&self, _req: GetVersionRequest) -> GetVersionResponse {
+        GetVersionResponse {
+            version: CESERVER_VERSION,
+            name: CESERVER_VERSION_STRING.to_string(),
         }
     }
 }
@@ -220,6 +231,13 @@ impl Handler<VirtualQueryExFullRequest> for DummyHandler {
             .unwrap_or_default();
 
         VirtualQueryExFullResponse { info }
+    }
+}
+
+impl Handler<SetConnectionNameRequest> for DummyHandler {
+    fn handle(&self, req: SetConnectionNameRequest) -> EmptyResponse {
+        info!("Connection name set to {:?}", req.name);
+        EmptyResponse
     }
 }
 

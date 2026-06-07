@@ -1,7 +1,8 @@
 use super::commands_request::*;
 
 pub trait FullHandler:
-    Handler<CreateToolHelp32SnapshotRequest>
+    Handler<GetVersionRequest>
+    + Handler<CreateToolHelp32SnapshotRequest>
     + Handler<Process32FirstRequest>
     + Handler<Process32NextRequest>
     + Handler<Module32FirstRequest>
@@ -14,6 +15,7 @@ pub trait FullHandler:
     + Handler<WriteProcessMemoryRequest>
     + Handler<VirtualQueryExRequest>
     + Handler<VirtualQueryExFullRequest>
+    + Handler<SetConnectionNameRequest>
 {
     fn create() -> Self;
 }

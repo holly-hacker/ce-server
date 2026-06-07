@@ -1,5 +1,5 @@
 use crate::server::{ce_common::*, commands_request::*, commands_response::*, handler::*};
-use log::warn;
+use log::{info, warn};
 use winapi::{
     shared::minwindef::{FALSE, LPCVOID, LPVOID},
     um::{
@@ -95,7 +95,9 @@ where
         Module32Response {
             entry: Some(CeModuleEntry {
                 module_base: entry.modBaseAddr as i64,
+                module_part: 0,
                 module_size: entry.modBaseSize as i32,
+                module_file_offset: 0,
                 module_name: cstring_to_string(std::mem::transmute(&entry.szModule[..])),
             }),
         }
@@ -114,6 +116,15 @@ impl Handler<CloseHandleRequest> for WindowsHandler {
             }
 
             I32Response { response }
+        }
+    }
+}
+
+impl Handler<GetVersionRequest> for WindowsHandler {
+    fn handle(&self, _req: GetVersionRequest) -> GetVersionResponse {
+        GetVersionResponse {
+            version: CESERVER_VERSION,
+            name: CESERVER_VERSION_STRING.to_string(),
         }
     }
 }
@@ -236,6 +247,13 @@ impl Handler<VirtualQueryExFullRequest> for WindowsHandler {
         }
 
         VirtualQueryExFullResponse { info: items }
+    }
+}
+
+impl Handler<SetConnectionNameRequest> for WindowsHandler {
+    fn handle(&self, req: SetConnectionNameRequest) -> EmptyResponse {
+        info!("Connection name set to {:?}", req.name);
+        EmptyResponse
     }
 }
 
