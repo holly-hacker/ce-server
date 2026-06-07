@@ -1,7 +1,5 @@
 use super::commands_request::*;
 
-pub trait HandlerFactory<T: FullHandler> {}
-
 pub trait FullHandler:
     Handler<CreateToolHelp32SnapshotRequest>
     + Handler<Process32FirstRequest>

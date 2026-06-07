@@ -8,5 +8,5 @@ mod handlers;
 #[allow(clippy::module_inception)] // FIXME
 mod server;
 
-pub use handlers::WindowsHandler;
+pub use handlers::PlatformHandler;
 pub use server::run;
